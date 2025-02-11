@@ -57,7 +57,7 @@ def save_to_parquet(df: pd.DataFrame, split: str) -> None:
     Returns:
         None: Saves the DataFrame to a file.
     """
-    output_path = f"./data/{split}.parquet"
+    output_path = f"./data/gsm8k_{split}.parquet"
 
     df.to_parquet(output_path, engine="pyarrow", index=False)
     print(f"{split} split saved to: {output_path}")
