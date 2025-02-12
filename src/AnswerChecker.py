@@ -15,6 +15,7 @@ class GSM8KAnswerCheckerResult:
     Attributes:
         is_correct (bool): Whether the answer is correct.
         explanation (str): Explanation of the correctness of the answer.
+        model_answer (str): The answer provided by the model.
         extracted_answer (str): The extracted numeric answer from the model's response.
         ground_truth (str): The correct answer provided as ground truth.
         check_method (str): The method used for validation (e.g., "Exact match" or "LLM judge").
@@ -22,6 +23,7 @@ class GSM8KAnswerCheckerResult:
 
     is_correct: bool
     explanation: str
+    model_answer: str
     extracted_answer: str
     ground_truth: str
     check_method: str
@@ -112,6 +114,7 @@ class GSM8KAnswerChecker:
                 results[idx] = GSM8KAnswerCheckerResult(
                     is_correct=False,
                     explanation="Answer contains no thinking tags",
+                    model_answer=model_answers[idx],
                     extracted_answer=None,
                     ground_truth=ground_truths[idx],
                     check_method="Exact match",
@@ -138,6 +141,7 @@ class GSM8KAnswerChecker:
                 results[idx] = GSM8KAnswerCheckerResult(
                     is_correct=is_correct,
                     explanation=explanation,
+                    model_answer=model_answers[idx],
                     extracted_answer=extracted_answers[idx],
                     ground_truth=ground_truths[idx],
                     check_method="Exact match",
@@ -165,6 +169,7 @@ class GSM8KAnswerChecker:
                 results[idx] = GSM8KAnswerCheckerResult(
                     is_correct=judge_output[idx] == 1,
                     explanation=explanation,
+                    model_answer=model_answers[idx],
                     extracted_answer=None,
                     ground_truth=ground_truths[idx],
                     check_method="LLM judge",
