@@ -3,11 +3,11 @@ import time
 from typing import Any, Dict, List
 
 import pandas as pd
-from vllm import LLM, SamplingParams
+import vllm
 
 from src import DataHandler, GSM8KAnswerChecker, GSM8KAnswerCheckerResult
 from src.config import DEFAULT_SETTINGS, MODEL_PATHS
-from src.prompts import gsm8k_prompt
+from src.llm_inference import inference_vllm
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -44,29 +44,6 @@ def load_dataset(split: str) -> pd.DataFrame:
     """
     data_handler = DataHandler("gsm8k")
     return data_handler.load_dataset()[split]
-
-
-def inference_model(llm: LLM, questions: List[str], seed: int, temperature: float) -> List[str]:
-    """
-    Runs inference using the provided LLM model on a set of questions.
-
-    Args:
-        llm (LLM): The language model to use for inference.
-        questions (List[str]): A list of questions to be processed by the model.
-        seed (int): The random seed for reproducibility.
-        temperature (float): The temperature parameter for sampling.
-
-    Returns:
-        List[str]: A list of generated responses from the model.
-    """
-    sampling_params = SamplingParams(
-        temperature=temperature, seed=seed, max_tokens=DEFAULT_SETTINGS["max_tokens"]
-    )
-    prompts = [gsm8k_prompt.format(question=q) for q in questions]
-
-    results = llm.generate(prompts=prompts, sampling_params=sampling_params)
-
-    return [r.outputs[0].text for r in results]
 
 
 def calculate_metrics(results: List[List[GSM8KAnswerCheckerResult]]) -> Dict[str, Any]:
@@ -148,7 +125,7 @@ def main():
     questions = df["question"].tolist()
     ground_truths = df["answer"].tolist()
 
-    llm = LLM(MODEL_PATHS["llm"], max_model_len=DEFAULT_SETTINGS["llm_max_length"])
+    llm = vllm.LLM(MODEL_PATHS["llm"], max_model_len=DEFAULT_SETTINGS["llm_max_length"])
     answer_checker = GSM8KAnswerChecker(model_name=DEFAULT_SETTINGS["llm"])
 
     # run the model for N times
@@ -156,7 +133,7 @@ def main():
     for i in range(number_of_runs):
         seed = seeds[i]
         temp = temperatures[i]
-        runs.append(inference_model(llm, questions, seed, temp))
+        runs.append(inference_vllm(llm, questions, seed, temp, MODEL_PATHS["llm"]))
 
     # judge the answers
     results = []

@@ -4,7 +4,7 @@ from vllm import LLM, SamplingParams
 from vllm.sampling_params import GuidedDecodingParams
 
 from .config import DEFAULT_SETTINGS, PROMPT_FORMATS
-from .prompts import llm_judge_prompt
+from .prompts import gsm8k_prompt, llm_judge_prompt
 
 
 def inference_llm_judge_vllm(
@@ -75,10 +75,38 @@ def inference_llm_judge_vllm(
         elif output[0].outputs[0].text.lower() == negative_answer_option.lower():
             results.append(0)
         else:
-            # invalid answer
+            # invalid answer option
             results.append(-1)
 
     return results
+
+
+def inference_vllm(
+    llm: LLM, questions: List[str], seed: int, temperature: float, model_name: str
+) -> List[str]:
+    """
+    Runs inference using the provided LLM model on a set of questions.
+
+    Args:
+        llm (LLM): The language model to use for inference.
+        questions (List[str]): A list of questions to be processed by the model.
+        seed (int): The random seed for reproducibility.
+        temperature (float): The temperature parameter for sampling.
+        model_name (str): The name of the model to use for inference.
+
+    Returns:
+        List[str]: A list of generated responses from the model.
+    """
+    sampling_params = SamplingParams(
+        temperature=temperature, seed=seed, max_tokens=DEFAULT_SETTINGS["max_tokens"]
+    )
+
+    prompts = [gsm8k_prompt.format(question=q) for q in questions]
+    prompts = apply_prompt_format(prompts, model_name)
+
+    results = llm.generate(prompts=prompts, sampling_params=sampling_params)
+
+    return [r.outputs[0].text for r in results]
 
 
 def apply_prompt_format(prompts: List[str], model_name: str) -> List[str]:
