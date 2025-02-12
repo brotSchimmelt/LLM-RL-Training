@@ -10,5 +10,6 @@ wheels/
 .venv
 .python-version
 
-# datasets
+# datasets & models
 *.parquet
+models/*
