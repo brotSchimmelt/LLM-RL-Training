@@ -1,5 +1,4 @@
 import os
-import threading
 
 from huggingface_hub import snapshot_download
 
@@ -27,18 +26,8 @@ def download_model(model_name: str, model_save_path: str) -> None:
 def main():
     os.makedirs(SAVE_DIR, exist_ok=True)
 
-    threads = [
-        threading.Thread(target=download_model, args=(DEFAULT_SETTINGS["llm"], MODEL_PATHS["llm"])),
-        threading.Thread(
-            target=download_model, args=(DEFAULT_SETTINGS["judge_model"], MODEL_PATHS["judge"])
-        ),
-    ]
-
-    for thread in threads:
-        thread.start()
-
-    for thread in threads:
-        thread.join()
+    download_model(DEFAULT_SETTINGS["llm"], MODEL_PATHS["llm"])
+    download_model(DEFAULT_SETTINGS["judge_model"], MODEL_PATHS["judge"])
 
 
 if __name__ == "__main__":
