@@ -1,4 +1,5 @@
 import argparse
+import os
 import time
 from typing import Any, Dict, List
 
@@ -8,6 +9,8 @@ import vllm
 from src import DataHandler, GSM8KAnswerChecker, GSM8KAnswerCheckerResult
 from src.config import DEFAULT_SETTINGS, MODEL_PATHS
 from src.llm_inference import inference_vllm
+
+os.environ["VLLM_CONFIGURE_LOGGING"] = 0
 
 
 def parse_arguments() -> argparse.Namespace:
