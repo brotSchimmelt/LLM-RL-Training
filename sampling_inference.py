@@ -7,7 +7,7 @@ from vllm import LLM, SamplingParams
 
 from src import DataHandler, GSM8KAnswerChecker, GSM8KAnswerCheckerResult
 from src.config import DEFAULT_SETTINGS, MODEL_PATHS
-from src.prompt import gsm8k_prompt
+from src.prompts import gsm8k_prompt
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -59,12 +59,14 @@ def inference_model(llm: LLM, questions: List[str], seed: int, temperature: floa
     Returns:
         List[str]: A list of generated responses from the model.
     """
-    sampling_params = SamplingParams(temperature=temperature, seed=seed)
+    sampling_params = SamplingParams(
+        temperature=temperature, seed=seed, max_tokens=DEFAULT_SETTINGS["max_tokens"]
+    )
     prompts = [gsm8k_prompt.format(question=q) for q in questions]
 
     results = llm.generate(prompts=prompts, sampling_params=sampling_params)
 
-    return [r[0].outputs[0].text for r in results]
+    return [r.outputs[0].text for r in results]
 
 
 def calculate_metrics(results: List[List[GSM8KAnswerCheckerResult]]) -> Dict[str, Any]:
@@ -159,12 +161,11 @@ def main():
     # judge the answers
     results = []
     for responses in runs:
-        for response in responses:
-            results.append(
-                answer_checker.check_answer(
-                    question=questions, model_answer=response, ground_truth=ground_truths
-                )
+        results.append(
+            answer_checker.check_answer(
+                question=questions, model_answer=responses, ground_truth=ground_truths
             )
+        )
 
     # calculate metrics
     metrics = calculate_metrics(results)
