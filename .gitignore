@@ -13,3 +13,10 @@ wheels/
 # datasets & models
 *.parquet
 models/*
+
+# terraform
+*.tfvars
+.terraform
+*.hcl
+*.info
+*.backup
