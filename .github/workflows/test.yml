@@ -34,6 +34,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install uv
 
+      - name: Download dataset files
+        run: |
+          uv run download_gsm8k.py
+
       - name: Install Dependencies using `uv sync`
         run: |
           uv sync
