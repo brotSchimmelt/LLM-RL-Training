@@ -3,14 +3,14 @@ import os
 import time
 from typing import Any, Dict, List
 
+os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
+
 import pandas as pd
 import vllm
 
 from src import DataHandler, GSM8KAnswerChecker, GSM8KAnswerCheckerResult
 from src.config import DEFAULT_SETTINGS, MODEL_PATHS
 from src.llm_inference import inference_vllm
-
-os.environ["VLLM_CONFIGURE_LOGGING"] = 0
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -20,9 +20,13 @@ def parse_arguments() -> argparse.Namespace:
         argparse.Namespace: A namespace containing the parsed command-line arguments.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seeds", nargs="+", type=int, help="List of seeds")
-    parser.add_argument("--temps", nargs="+", type=float, help="List of temperatures")
-    parser.add_argument("--dataset-split", type=str, help="Dataset split to use")
+    parser.add_argument("--seeds", nargs="+", type=int, required=True, help="List of seeds")
+    parser.add_argument(
+        "--temps", nargs="+", type=float, required=True, help="List of temperatures"
+    )
+    parser.add_argument(
+        "--dataset-split", type=str, default="test_100", help="Dataset split to use"
+    )
 
     args = parser.parse_args()
 
