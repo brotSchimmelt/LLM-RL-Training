@@ -3,8 +3,8 @@ from typing import List, Union
 
 import numpy as np
 
-import utils
-from llm_inference import inference_llm_judge_vllm
+from . import utils
+from .llm_inference import inference_llm_judge_vllm
 
 
 @dataclass

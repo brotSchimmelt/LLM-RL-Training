@@ -3,8 +3,8 @@ from typing import List
 from vllm import LLM, SamplingParams
 from vllm.sampling_params import GuidedDecodingParams
 
-from config import DEFAULT_SETTINGS
-from prompts import llm_judge_prompt
+from .config import DEFAULT_SETTINGS
+from .prompts import llm_judge_prompt
 
 
 def inference_llm_judge_vllm(
