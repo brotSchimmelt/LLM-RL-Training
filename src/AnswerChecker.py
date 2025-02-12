@@ -153,7 +153,7 @@ class GSM8KAnswerChecker:
         if malformed_answers:
             judge_output = inference_llm_judge_vllm(
                 questions=[questions[idx] for idx in malformed_answers.keys()],
-                answers=list(malformed_answers.values()),
+                model_answers=list(malformed_answers.values()),
                 ground_truths=[ground_truths[idx] for idx in malformed_answers.keys()],
             )
 
