@@ -1,7 +1,26 @@
+import re
+from pathlib import Path
+from typing import Union
+
 import pandas as pd
 from datasets import load_dataset
 
-from src import utils
+
+def extract_number_gsm8k(text: str) -> Union[int, bool]:
+    """Extracts a number from a given text using a specific pattern.
+
+    This function searches for a number that follows the '####' pattern
+    in the input text and returns it as an integer. If no match is found,
+    it returns None.
+
+    Args:
+        text (str): The input text containing the number.
+
+    Returns:
+        Union[int, bool]: The extracted number as an integer if found, otherwise None.
+    """
+    match = re.search(r"####\s*(\d+)", str(text))
+    return int(match.group(1)) if match else None
 
 
 def download_gsm8k(split: str, config: str = "main") -> pd.DataFrame:
@@ -34,7 +53,7 @@ def preprocess_gsm8k(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.rename(columns={"answer": "raw_answer"})
     df["raw_answer"] = df["raw_answer"].str.strip()
-    df["answer"] = df["raw_answer"].apply(utils.extract_number_gsm8k)
+    df["answer"] = df["raw_answer"].apply(extract_number_gsm8k)
 
     # remove rows with no correctly formatted answer
     df = df.dropna(subset=["answer"])
@@ -60,6 +79,11 @@ def save_to_parquet(df: pd.DataFrame, split: str) -> None:
 
 def main():
     for split in ["train", "test"]:
+        file_path = Path(f"./data/gsm8k_{split}.parquet")
+        if file_path.exists():
+            print(f"{split} split already exists")
+            continue
+
         print(f"Downloading {split} ...")
         df = download_gsm8k(split)
         df = preprocess_gsm8k(df)
