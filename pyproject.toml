@@ -9,12 +9,13 @@ dependencies = [
     "ollama>=0.4.7",
     "pandas>=2.2.3",
     "pyarrow>=19.0.0",
+    "vllm>=0.7.2",
 ]
 
 [dependency-groups]
-dev = [
-    "ipykernel>=6.29.5",
-    "pip>=25.0.1",
-    "pytest>=8.3.4",
-    "ruff>=0.9.6",
-]
+dev = ["ipykernel>=6.29.5", "pip>=25.0.1", "pytest>=8.3.4", "ruff>=0.9.6"]
+
+[tool.ruff]
+lint.select = ["E", "F"]
+lint.per-file-ignores = { "__init__.py" = ["F401"] }
+line-length = 100
