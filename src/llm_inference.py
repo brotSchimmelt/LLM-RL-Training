@@ -15,7 +15,7 @@ def inference_llm_judge_vllm(
     max_model_length: int = DEFAULT_SETTINGS["judge_max_model_length"],
     positive_answer_option: str = "yes",
     negative_answer_option: str = "no",
-) -> List[bool]:
+) -> List[int]:
     """
     Uses an LLM to evaluate the correctness of model-generated answers.
 
@@ -36,8 +36,9 @@ def inference_llm_judge_vllm(
         negative_answer_option (str, optional): The option for a negative answer.
 
     Returns:
-        List[bool]: A list of boolean values where `True` indicates that the model's answer
-        is correct according to the LLM judge, and `False` indicates an incorrect answer.
+        List[int]: A list of integer values where `1` indicates that the model's answer
+        is correct according to the LLM judge, and `0` indicates an incorrect answer. -1 indicates
+        an invalid answer or bad response.
     """
     answer_options = [positive_answer_option, negative_answer_option]
 
@@ -68,9 +69,12 @@ def inference_llm_judge_vllm(
 
     results = []
     for output in outputs:
-        if output[0].outputs[0].text.lower() == answer_options[0].lower():
-            results.append(True)
+        if output[0].outputs[0].text.lower() == positive_answer_option.lower():
+            results.append(1)
+        elif output[0].outputs[0].text.lower() == negative_answer_option.lower():
+            results.append(0)
         else:
-            results.append(False)
+            # invalid answer
+            results.append(-1)
 
     return results

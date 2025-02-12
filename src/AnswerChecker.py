@@ -154,14 +154,16 @@ class GSM8KAnswerChecker:
             )
 
             for idx in malformed_answers.keys():
-                explanation = (
-                    "LLM judge says 'correct'"
-                    if judge_output[idx]
-                    else "LLM judge says 'incorrect'"
-                )
+                if judge_output[idx] == 1:
+                    explanation = "LLM judge says 'correct'"
+
+                elif judge_output[idx] == 0:
+                    explanation = "LLM judge says 'incorrect'"
+                else:
+                    explanation = "LLM judge answer was invalid"
 
                 results[idx] = GSM8KAnswerCheckerResult(
-                    is_correct=judge_output[idx],
+                    is_correct=judge_output[idx] == 1,
                     explanation=explanation,
                     extracted_answer=None,
                     ground_truth=ground_truths[idx],
