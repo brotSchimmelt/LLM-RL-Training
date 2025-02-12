@@ -3,7 +3,7 @@ from typing import List
 from vllm import LLM, SamplingParams
 from vllm.sampling_params import GuidedDecodingParams
 
-from .config import DEFAULT_SETTINGS
+from .config import DEFAULT_SETTINGS, PROMPT_FORMATS
 from .prompts import llm_judge_prompt
 
 
@@ -59,6 +59,7 @@ def inference_llm_judge_vllm(
         )
         for question, answer, ground_truth in zip(questions, model_answers, ground_truths)
     ]
+    prompts = apply_prompt_format(prompts, judge_model)
 
     llm = LLM(model=judge_model, max_model_len=max_model_length)
 
@@ -78,3 +79,25 @@ def inference_llm_judge_vllm(
             results.append(-1)
 
     return results
+
+
+def apply_prompt_format(prompts: List[str], model_name: str) -> List[str]:
+    """
+    Applies the appropriate prompt format based on the given model name.
+
+    Args:
+        prompts (List[str]): A list of input prompts to be formatted.
+        model_name (str): The name of the model, which determines the prompt format.
+
+    Raises:
+        ValueError: If the model name does not match any predefined prompt formats.
+
+    Returns:
+        List[str]: A list of formatted prompts based on the specified model.
+    """
+    if "llama" in model_name.lower():
+        return [PROMPT_FORMATS["llama3"]["prompt_template"].format(p) for p in prompts]
+    elif "qwen" in model_name.lower():
+        return [PROMPT_FORMATS["chatml"]["prompt_template"].format(p) for p in prompts]
+    else:
+        raise ValueError(f"No prompt template found in config.py for {model_name}")
