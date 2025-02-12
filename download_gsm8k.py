@@ -1,7 +1,7 @@
-import re
-
 import pandas as pd
 from datasets import load_dataset
+
+from src import utils
 
 
 def download_gsm8k(split: str, config: str = "main") -> pd.DataFrame:
@@ -32,14 +32,9 @@ def preprocess_gsm8k(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: The preprocessed dataset with a cleaned 'answer' column.
     """
 
-    def extract_number(text):
-        """Extracts the final numeric answer from a solution string."""
-        match = re.search(r"####\s*(\d+)", str(text))
-        return int(match.group(1)) if match else None
-
     df = df.rename(columns={"answer": "raw_answer"})
     df["raw_answer"] = df["raw_answer"].str.strip()
-    df["answer"] = df["raw_answer"].apply(extract_number)
+    df["answer"] = df["raw_answer"].apply(utils.extract_number_gsm8k)
 
     # remove rows with no correctly formatted answer
     df = df.dropna(subset=["answer"])
