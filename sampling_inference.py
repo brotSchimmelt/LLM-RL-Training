@@ -5,8 +5,8 @@ from typing import List
 
 # turn off logging to terminal for vLLM
 os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
-
 import pandas as pd
+import torch.distributed as dist
 import vllm
 
 from src import DataHandler
@@ -98,7 +98,7 @@ def main():
         temp = temperatures[i]
         runs.append(inference_vllm(llm, questions, seed, temp, MODEL_PATHS["llm"]))
 
-    save_results(runs, ground_truths, questions)
+    save_results(runs, ground_truths, questions, split)
 
 
 if __name__ == "__main__":
@@ -106,3 +106,5 @@ if __name__ == "__main__":
     main()
     elapsed_time = time.time() - start_time
     print(f"Script execution time: {elapsed_time:.1f} seconds")
+    if dist.is_initialized():
+        dist.destroy_process_group()
